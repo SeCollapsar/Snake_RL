@@ -1,32 +1,27 @@
 import os
-import numpy as np
 
 from env.snake_env import SnakeEnv
 from rl.policy_network import PolicyNetwork
 from rl.reinforce import ReinforceAgent
+from config import Config
 
 
 env = SnakeEnv()
-
 policy = PolicyNetwork()
-
-if os.path.exists("models/policy.npy"):
-    policy.load()
+policy.load()
 
 agent = ReinforceAgent(policy)
 
-episodes = 5000
+episodes = Config.EPISODES
+
+best_reward = -1e9  # 记录历史最优
 
 
 for ep in range(episodes):
 
     state = env.reset()
 
-    states = []
-    actions = []
-    rewards = []
-    probs = []
-    hiddens = []
+    states, actions, rewards, probs, hiddens = [], [], [], [], []
 
     while True:
 
@@ -45,9 +40,21 @@ for ep in range(episodes):
         if done:
             break
 
+    total_reward = sum(rewards)
+
     agent.update(states, actions, probs, hiddens, rewards)
 
-    if ep % 100 == 0:
-        print("Episode", ep, "Reward", sum(rewards))
+    # ---------- 保存主模型 ----------
+    policy.save()
 
-        policy.save()
+    # ---------- 保存最优模型 ----------
+    if total_reward > best_reward:
+
+        best_reward = total_reward
+
+        print(f"[BEST] Episode {ep}, Reward: {total_reward}")
+
+        policy.save_backup(best_reward)
+
+    if ep % 100 == 0:
+        print(f"Episode {ep}, Reward: {total_reward}")
