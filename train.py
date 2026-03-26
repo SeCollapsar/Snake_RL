@@ -50,9 +50,9 @@ for ep in range(episodes):
     # ---------- 保存最优模型 ----------
     if total_reward > best_reward:
 
-        best_reward = total_reward
+        # best_reward = total_reward
 
-        print(f"[BEST] Episode {ep}, Reward: {total_reward}")
+        # print(f"[BEST] Episode {ep}, Reward: {total_reward}")
 
         policy.save_backup(best_reward)
 
