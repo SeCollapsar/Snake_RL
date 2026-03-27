@@ -26,7 +26,9 @@ class PolicyNetwork:
 
         return probs, h
 
-    def softmax(self, x):
+    def softmax(self, x, temperature=Config.TEMPERATURE):
+
+        x = x / temperature
 
         e = np.exp(x - np.max(x))
         return e / np.sum(e)

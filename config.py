@@ -11,14 +11,19 @@ class Config:
 
     # ---------- 环境 ----------
     GRID_SIZE = 10
-    MAX_STEPS_WITHOUT_FOOD = 200
+    MAX_STEPS_WITHOUT_FOOD = 150
 
     # ---------- 奖励 ----------
-    REWARD_DEATH = -20
+    REWARD_DEATH = -30
     REWARD_EAT = 10
     REWARD_WIN = 50
     REWARD_STEP = -0.01
     REWARD_DISTANCE_FACTOR = 0.1
+    REWARD_REPEAT_PENALTY = -0.05
+
+    # ---------- 其他 ----------
+    EPSILON = 0.02
+    TEMPERATURE = 1.5
 
     # ---------- GUI ----------
     WINDOW_SIZE = 600

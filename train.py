@@ -1,9 +1,10 @@
-import os
-
 from env.snake_env import SnakeEnv
 from rl.policy_network import PolicyNetwork
 from rl.reinforce import ReinforceAgent
 from config import Config
+
+from utils.logger import Logger
+from utils.topk_analyzer import analyze_topk
 
 
 env = SnakeEnv()
@@ -12,9 +13,10 @@ policy.load()
 
 agent = ReinforceAgent(policy)
 
-episodes = Config.EPISODES
+logger = Logger()
 
-best_reward = -1e9  # 记录历史最优
+episodes = Config.EPISODES
+best_reward = -1e9
 
 
 for ep in range(episodes):
@@ -44,17 +46,16 @@ for ep in range(episodes):
 
     agent.update(states, actions, probs, hiddens, rewards)
 
-    # ---------- 保存主模型 ----------
     policy.save()
 
-    # ---------- 保存最优模型 ----------
     if total_reward > best_reward:
+        best_reward = total_reward
+        policy.save_backup(total_reward)
 
-        # best_reward = total_reward
-
-        # print(f"[BEST] Episode {ep}, Reward: {total_reward}")
-
-        policy.save_backup(best_reward)
+    logger.log(total_reward)
 
     if ep % 100 == 0:
         print(f"Episode {ep}, Reward: {total_reward}")
+
+        logger.save_curve()
+        analyze_topk()

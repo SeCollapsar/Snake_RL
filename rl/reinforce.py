@@ -1,4 +1,5 @@
 import numpy as np
+from config import Config
 
 
 class ReinforceAgent:
@@ -9,9 +10,16 @@ class ReinforceAgent:
         self.lr = lr
         self.gamma = gamma
 
+        # 防策略坍塌
+        # self.epsilon = Config.EPSILON
+
     def sample_action(self, state):
 
         probs, hidden = self.policy.forward(state)
+
+        # ---------- 防策略坍塌 ----------
+        # probs = (1 - self.epsilon) * probs + self.epsilon / len(probs)
+        # probs = probs / np.sum(probs)
 
         action = np.random.choice(len(probs), p=probs)
 

@@ -6,9 +6,6 @@ from config import Config
 
 
 class SnakeEnv:
-    """
-    增强版 SnakeEnv（使用 Config 管理参数）
-    """
 
     def __init__(self):
 
@@ -38,6 +35,8 @@ class SnakeEnv:
 
         self.steps_since_last_food = 0
 
+        self.visited = {}
+
         self.spawn_food()
 
         return self.get_state()
@@ -64,7 +63,6 @@ class SnakeEnv:
 
     def step(self, action):
 
-        # ---------- 禁止反向 ----------
         if action == self.opposite[self.current_action]:
             action = self.current_action
 
@@ -84,42 +82,43 @@ class SnakeEnv:
             or new_head[1] < 0
             or new_head[1] >= self.size
         ):
-            self.score += Config.REWARD_DEATH
-            self.done = True
             return self.get_state(), Config.REWARD_DEATH, True
 
         # ---------- 撞身体 ----------
         if new_head in self.snake:
-            self.score += Config.REWARD_DEATH
-            self.done = True
             return self.get_state(), Config.REWARD_DEATH, True
 
-        # ---------- 移动 ----------
         self.snake.insert(0, new_head)
 
         reward = Config.REWARD_STEP
 
         new_dist = self.manhattan(new_head, self.food)
 
-        # ---------- 距离奖励 ----------
         reward += Config.REWARD_DISTANCE_FACTOR * (old_dist - new_dist)
 
         self.steps_since_last_food += 1
 
+        # ---------- 重复路径惩罚 ----------
+        if new_head not in self.visited:
+            self.visited[new_head] = 0
+
+        self.visited[new_head] += 1
+
+        repeat_penalty = Config.REWARD_REPEAT_PENALTY * np.log(self.visited[new_head] + 1)
+        reward += repeat_penalty
+
         # ---------- 吃到食物 ----------
         if new_head == self.food:
 
-            self.score += 1
             reward = Config.REWARD_EAT
 
             self.steps_since_last_food = 0
 
-            if len(self.snake) == self.max_cells:
+            # 👉 清空访问记录（关键）
+            self.visited = {}
 
-                self.score += Config.REWARD_WIN
-                reward += Config.REWARD_WIN
-                self.done = True
-                return self.get_state(), reward, True
+            if len(self.snake) == self.max_cells:
+                return self.get_state(), reward + Config.REWARD_WIN, True
 
             self.spawn_food()
 
@@ -128,9 +127,6 @@ class SnakeEnv:
 
         # ---------- 超时 ----------
         if self.steps_since_last_food >= self.max_steps_without_food:
-
-            self.score += Config.REWARD_DEATH
-            self.done = True
             return self.get_state(), Config.REWARD_DEATH, True
 
         return self.get_state(), reward, False
