@@ -1,6 +1,6 @@
 from env.snake_env import SnakeEnv
 from rl.policy_network import PolicyNetwork
-from rl.reinforce import ReinforceAgent
+from rl.reinforce.reinforce import ReinforceAgent
 from config import Config
 
 from utils.logger import Logger
