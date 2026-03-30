@@ -9,7 +9,7 @@ def analyze_topk():
 
     backup_dir = os.path.join(
         Config.MODEL_DIR,
-        f"policy_{grid}_backup"
+        f"policy_{grid}_backup_r"
     )
 
     rewards = []
